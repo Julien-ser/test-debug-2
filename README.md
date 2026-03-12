@@ -25,7 +25,7 @@ A Python command-line tool that fetches and displays weather information using t
   - ✅ Base CLI command structure with argument parsing (location, units, format, forecast)
   - ✅ API client implementation
   - ✅ Data models
-  - ⏳ Output formatters
+  - ✅ Output formatters (table and JSON formats)
 
 ## Technology Stack
 

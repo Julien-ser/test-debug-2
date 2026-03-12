@@ -18,7 +18,7 @@
   - Deliverable: api/client.py with `WeatherClient.get_current()` and `WeatherClient.get_forecast(days)` methods
 - [x] Design and implement data models for weather responses
   - Deliverable: models.py with @dataclass definitions for CurrentWeather and ForecastItem (temp, humidity, wind_speed, description, timestamp)
-- [ ] Build output formatters for terminal display (table and JSON formats)
+- [x] Build output formatters for terminal display (table and JSON formats)
   - Deliverable: display/format.py with `format_current()` and `format_forecast()` supporting both formats
 
 ## Phase 3: Error Handling & Testing
