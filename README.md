@@ -17,9 +17,9 @@ A Python command-line tool that fetches and displays weather information using t
 **Phase 1: Planning & Setup** - In Progress
 - ✅ Requirements documented (see `requirements.md`)
 - ✅ API provider selected (WeatherAPI.com) - see `API_COMPARISON.md`
-- ✅ Python project initialization (pyproject.toml, virtual environment)
-- 🔄 Project structure initialization (next step)
-- ⏳ Initial Git commit
+ - ✅ Python project initialization (pyproject.toml, virtual environment)
+ - ✅ Project structure and Git repository initialized
+ - ✅ Initial Git commit
 
 **Phase 2: Core Development** - Pending
 
