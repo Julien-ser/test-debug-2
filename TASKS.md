@@ -32,7 +32,7 @@
   - Deliverable: Validation logic in CLI parser rejecting invalid inputs before API call
 
 ## Phase 4: Polish & Documentation
-- [ ] Add caching layer to reduce API calls for identical requests within 10 minutes
+- [x] Add caching layer to reduce API calls for identical requests within 10 minutes
   - Deliverable: cache.py using requests-cache or disk cache with TTL configuration
 - [ ] Create comprehensive README with installation, usage examples, and troubleshooting
   - Deliverable: README.md covering quickstart, API key setup, commands reference, and common errors

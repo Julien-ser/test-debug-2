@@ -14,24 +14,31 @@ A Python command-line tool that fetches and displays weather information using t
 
 ## Project Status
 
-**Phase 1: Planning & Setup** - In Progress
+**Phase 1: Planning & Setup** - Completed
 - ✅ Requirements documented (see `requirements.md`)
 - ✅ API provider selected (WeatherAPI.com) - see `API_COMPARISON.md`
- - ✅ Python project initialization (pyproject.toml, virtual environment)
- - ✅ Project structure and Git repository initialized
- - ✅ Initial Git commit
+- ✅ Python project initialization (pyproject.toml, virtual environment)
+- ✅ Project structure and Git repository initialized
+- ✅ Initial Git commit
 
 **Phase 2: Core Development** - Completed
-   - ✅ Base CLI command structure with argument parsing (location, units, format, forecast)
-   - ✅ API client implementation
-   - ✅ Data models
-   - ✅ Output formatters (table and JSON formats)
+  - ✅ Base CLI command structure with argument parsing (location, units, format, forecast)
+  - ✅ API client implementation
+  - ✅ Data models
+  - ✅ Output formatters (table and JSON formats)
 
 **Phase 3: Error Handling & Testing** - Completed
   - ✅ Comprehensive error handling (network failures, invalid locations, API limits) with custom exceptions
   - ✅ Unit tests for API client (80%+ coverage with mocked responses)
+  - ✅ Unit tests for cache module
   - ✅ Integration tests for full CLI workflow (validation, error handling, success paths)
   - ✅ Input validation for location formats and units parameter
+
+**Phase 4: Polish & Documentation** - In Progress
+  - ✅ Caching layer implemented with 10-minute TTL using requests-cache
+  - ⏳ Comprehensive README with installation, usage examples, and troubleshooting
+  - ⏳ Config file support for default API key and units
+  - ⏳ Package the tool for PyPI distribution and create installation instructions
 
 ## Technology Stack
 
