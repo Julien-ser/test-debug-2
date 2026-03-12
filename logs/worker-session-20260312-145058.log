@@ -1528,3 +1528,29 @@ Untracked files:
 no changes added to commit (use "git add" and/or "git commit -a")
 [0m
 [0m$ [0mgit diff --cached
+[0m
+[0m$ [0mgit add .
+[0m
+[0m$ [0mgit commit -m "Feature: Build output formatters with table and JSON support"
+[main 59fa19f] Feature: Build output formatters with table and JSON support
+ 8 files changed, 1054 insertions(+), 10 deletions(-)
+ create mode 100644 logs/iteration-11.md
+ create mode 100644 src/weather_cli/display/__init__.py
+ create mode 100644 src/weather_cli/display/format.py
+ create mode 100644 test_formatters.py
+[0m
+Now let me commit and push the changes:
+[0m$ [0mgit push origin main
+To https://github.com/Julien-ser/test-debug-2.git
+   638c8bd..59fa19f  main -> main
+[0m
+Task complete! I've successfully built output formatters for terminal display (table and JSON formats). The changes are committed and pushed to GitHub.
+
+Key deliverables:
+- Created `src/weather_cli/display/format.py` with `format_current()` and `format_forecast()` functions
+- Both table (using tabulate) and JSON formats are supported
+- Updated `weather.py` to integrate API client and formatters
+- Added proper error handling and API key configuration
+- Updated TASKS.md and README.md to reflect completion
+📝 Log saved: logs/iteration-11.md
+📊 Token Usage: 6000 / Session: 43000 / 64000
