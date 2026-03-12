@@ -4,10 +4,16 @@ from typing import Optional
 
 from weather_cli.api.client import (
     WeatherClient,
-    WeatherAPIError,
+    WeatherCLIError,
     AuthenticationError,
     InvalidLocationError,
     RateLimitError,
+    NetworkError,
+)
+from weather_cli.validation import (
+    validate_location,
+    validate_units,
+    validate_forecast_days,
 )
 from weather_cli.models import CurrentWeather, Forecast
 from weather_cli.display.format import format_current, format_forecast
@@ -49,21 +55,27 @@ def main(
     Requires a WeatherAPI.com API key. Set WEATHER_API_KEY environment variable
     or use --api-key option.
     """
-    # Input validation
-    if not location or not location.strip():
-        raise click.BadParameter("Location cannot be empty", param_hint="location")
-
+    # Comprehensive input validation
     location = location.strip()
 
-    # Validate forecast days if provided
-    if forecast < 0:
+    # Validate location format
+    is_valid_loc, loc_error = validate_location(location)
+    if not is_valid_loc:
         raise click.BadParameter(
-            "Forecast days must be non-negative", param_hint="--forecast"
+            f"Invalid location: {loc_error}. Please provide a valid city name, "
+            "coordinates (lat,lon), or postal code.",
+            param_hint="location",
         )
-    if forecast > 15:
-        raise click.BadParameter(
-            "Forecast days cannot exceed 15", param_hint="--forecast"
-        )
+
+    # Validate units
+    is_valid_units, units_error = validate_units(units)
+    if not is_valid_units:
+        raise click.BadParameter(units_error, param_hint="--units")
+
+    # Validate forecast days
+    is_valid_days, days_error = validate_forecast_days(forecast)
+    if not is_valid_days:
+        raise click.BadParameter(days_error, param_hint="--forecast")
 
     # Get API key
     if not api_key:
@@ -71,7 +83,8 @@ def main(
 
     if not api_key:
         raise click.UsageError(
-            "API key required. Set WEATHER_API_KEY environment variable or use --api-key option."
+            "API key required. Set WEATHER_API_KEY environment variable or use --api-key option.\n"
+            "Example: export WEATHER_API_KEY=your_key_here"
         )
 
     try:
@@ -90,10 +103,31 @@ def main(
             click.echo(output)
 
     except AuthenticationError as e:
-        raise click.UsageError(f"Authentication failed: {str(e)}")
+        raise click.UsageError(
+            f"Authentication failed: {str(e)}\n"
+            "Please check your API key is correct and active."
+        )
     except InvalidLocationError as e:
-        raise click.UsageError(f"Location error: {str(e)}")
+        raise click.UsageError(
+            f"Location not found: {str(e)}\n"
+            "Try using a different city name, coordinates (lat,lon), or postal code."
+        )
     except RateLimitError as e:
-        raise click.UsageError(f"Rate limit exceeded: {str(e)}")
-    except WeatherAPIError as e:
-        raise click.UsageError(f"Weather API error: {str(e)}")
+        raise click.UsageError(
+            f"Rate limit exceeded: {str(e)}\n"
+            "Please wait a moment before trying again. Consider upgrading your API plan if this persists."
+        )
+    except NetworkError as e:
+        raise click.UsageError(
+            f"Network error: {str(e)}\n"
+            "Please check your internet connection and try again."
+        )
+    except WeatherCLIError as e:
+        raise click.UsageError(
+            f"Error: {str(e)}\n"
+            "If this problem persists, please check your network connection and API key."
+        )
+    except Exception as e:
+        raise click.UsageError(
+            f"Unexpected error: {str(e)}\nPlease report this issue if it continues."
+        )
