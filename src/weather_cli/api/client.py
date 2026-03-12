@@ -9,29 +9,14 @@ from typing import Optional, Dict, Any
 import requests
 from requests.exceptions import RequestException, Timeout, ConnectionError
 
-
-class WeatherAPIError(Exception):
-    """Base exception for Weather API errors."""
-
-    pass
-
-
-class AuthenticationError(WeatherAPIError):
-    """Raised when API authentication fails."""
-
-    pass
-
-
-class InvalidLocationError(WeatherAPIError):
-    """Raised when the location is invalid or not found."""
-
-    pass
-
-
-class RateLimitError(WeatherAPIError):
-    """Raised when API rate limit is exceeded."""
-
-    pass
+from weather_cli.exceptions import (
+    WeatherCLIError,
+    AuthenticationError,
+    InvalidLocationError,
+    RateLimitError,
+    NetworkError,
+    APIResponseError,
+)
 
 
 class WeatherClient:
@@ -70,12 +55,15 @@ class WeatherClient:
             InvalidLocationError: If location is not found
             AuthenticationError: If API key is invalid
             RateLimitError: If rate limit is exceeded
-            WeatherAPIError: For other API errors
-            RequestException: For network/connection issues
+            NetworkError: For network/connection issues
+            APIResponseError: For malformed API responses
         """
+        if not location or not location.strip():
+            raise ValueError("Location must be a non-empty string")
+
         params = {
             "key": self.api_key,
-            "q": location,
+            "q": location.strip(),
             "aqi": "no",  # Skip air quality to reduce data
         }
 
@@ -83,12 +71,35 @@ class WeatherClient:
             response = self.session.get(
                 f"{self.BASE_URL}/current.json", params=params, timeout=10
             )
-
             self._handle_response_errors(response)
-            return response.json()
 
+            try:
+                data = response.json()
+            except ValueError as e:
+                raise APIResponseError(
+                    f"Invalid response format from API: {str(e)}", response_data=None
+                ) from e
+
+            # Validate essential response structure
+            if not isinstance(data, dict):
+                raise APIResponseError(
+                    "API returned non-dictionary response", response_data=data
+                )
+
+            return data
+
+        except Timeout as e:
+            raise NetworkError(
+                f"Request timeout: The server did not respond within 10 seconds",
+                original_error=e,
+            ) from e
+        except ConnectionError as e:
+            raise NetworkError(
+                f"Connection error: Unable to connect to the weather service",
+                original_error=e,
+            ) from e
         except RequestException as e:
-            raise WeatherAPIError(f"Network error: {str(e)}") from e
+            raise NetworkError(f"Network error: {str(e)}", original_error=e) from e
 
     def get_forecast(self, location: str, days: int = 3) -> Dict[str, Any]:
         """
@@ -106,15 +117,18 @@ class WeatherClient:
             InvalidLocationError: If location is not found
             AuthenticationError: If API key is invalid
             RateLimitError: If rate limit is exceeded
-            WeatherAPIError: For other API errors
-            RequestException: For network/connection issues
+            NetworkError: For network/connection issues
+            APIResponseError: For malformed API responses
         """
         if not 1 <= days <= 15:
             raise ValueError("Forecast days must be between 1 and 15")
 
+        if not location or not location.strip():
+            raise ValueError("Location must be a non-empty string")
+
         params = {
             "key": self.api_key,
-            "q": location,
+            "q": location.strip(),
             "days": days,
             "aqi": "no",
             "alerts": "no",
@@ -126,10 +140,34 @@ class WeatherClient:
             )
 
             self._handle_response_errors(response)
-            return response.json()
 
+            try:
+                data = response.json()
+            except ValueError as e:
+                raise APIResponseError(
+                    f"Invalid response format from API: {str(e)}", response_data=None
+                ) from e
+
+            # Validate essential response structure
+            if not isinstance(data, dict):
+                raise APIResponseError(
+                    "API returned non-dictionary response", response_data=data
+                )
+
+            return data
+
+        except Timeout as e:
+            raise NetworkError(
+                f"Request timeout: The server did not respond within 15 seconds",
+                original_error=e,
+            ) from e
+        except ConnectionError as e:
+            raise NetworkError(
+                f"Connection error: Unable to connect to the weather service",
+                original_error=e,
+            ) from e
         except RequestException as e:
-            raise WeatherAPIError(f"Network error: {str(e)}") from e
+            raise NetworkError(f"Network error: {str(e)}", original_error=e) from e
 
     def _handle_response_errors(self, response: requests.Response) -> None:
         """
@@ -142,7 +180,7 @@ class WeatherClient:
             AuthenticationError: 401, 403
             InvalidLocationError: 400, 404
             RateLimitError: 429
-            WeatherAPIError: Other error codes
+            WeatherCLIError: Other error codes
         """
         if response.status_code == 200:
             return
@@ -164,7 +202,7 @@ class WeatherClient:
         elif response.status_code == 429:
             raise RateLimitError(f"Rate limit exceeded: {error_message}")
         else:
-            raise WeatherAPIError(
+            raise APIResponseError(
                 f"API error ({response.status_code}): {error_message}"
             )
 
