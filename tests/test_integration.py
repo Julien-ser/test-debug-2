@@ -95,22 +95,24 @@ class TestCLIValidation:
 class TestCLIErrorHandling:
     """Tests for CLI error handling and user-friendly messages."""
 
-     @pytest.fixture
-     def runner(self):
-         """Create a CLI runner for testing."""
-         return CliRunner()
+    @pytest.fixture
+    def runner(self):
+        """Create a CLI runner for testing."""
+        return CliRunner()
 
-     def test_authentication_error_message(self, runner):
-         """Test authentication error shows helpful guidance."""
-         with patch('weather_cli.weather.WeatherClient') as mock_client_class:
-             mock_client = mock_client_class.return_value
-             mock_client.__enter__ = Mock(return_value=mock_client)
-             mock_client.__exit__ = Mock(return_value=None)
-             mock_client.get_current.side_effect = AuthenticationError("Invalid API key", status_code=401)
-             result = runner.invoke(main, ["London"], env={"WEATHER_API_KEY": "bad_key"})
-             assert result.exit_code != 0
-             output_lower = result.output.lower()
-             assert ("api key" in output_lower or "authentication" in output_lower)
+    def test_authentication_error_message(self, runner):
+        """Test authentication error shows helpful guidance."""
+        with patch("weather_cli.weather.WeatherClient") as mock_client_class:
+            mock_client = mock_client_class.return_value
+            mock_client.__enter__ = Mock(return_value=mock_client)
+            mock_client.__exit__ = Mock(return_value=None)
+            mock_client.get_current.side_effect = AuthenticationError(
+                "Invalid API key", status_code=401
+            )
+            result = runner.invoke(main, ["London"], env={"WEATHER_API_KEY": "bad_key"})
+            assert result.exit_code != 0
+            output_lower = result.output.lower()
+            assert "api key" in output_lower or "authentication" in output_lower
 
     def test_missing_api_key_error(self, runner):
         """Test missing API key shows setup instructions."""

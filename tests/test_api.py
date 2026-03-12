@@ -238,7 +238,9 @@ class TestGetCurrent:
             mock_session_class.return_value = mock_session
 
             client = WeatherClient("test_key")
-            with pytest.raises(APIResponseError, match="non-dictionary response"):
+            with pytest.raises(
+                APIResponseError, match="API response is not a dictionary"
+            ):
                 client.get_current("London")
 
     def test_get_current_handles_unexpected_http_status(self):
@@ -254,7 +256,9 @@ class TestGetCurrent:
             mock_session_class.return_value = mock_session
 
             client = WeatherClient("test_key")
-            with pytest.raises(APIResponseError, match="API error \\(500\\)"):
+            with pytest.raises(
+                APIResponseError, match="WeatherAPI server error \\(500\\)"
+            ):
                 client.get_current("London")
 
 
@@ -266,7 +270,11 @@ class TestGetForecast:
         """Create a mock successful forecast response."""
         return {
             "location": {"name": "London", "country": "GB"},
-            "current": {"last_updated": "2024-01-15 10:30"},
+            "current": {
+                "temp_c": 15.0,
+                "temp_f": 59.0,
+                "last_updated": "2024-01-15 10:30",
+            },
             "forecast": {
                 "forecastday": [
                     {

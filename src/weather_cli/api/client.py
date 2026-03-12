@@ -330,8 +330,8 @@ class WeatherClient:
             retry_after_header = response.headers.get("Retry-After")
             if retry_after_header:
                 try:
-                    retry_after = int(retry_after_header)
-                except ValueError:
+                    retry_after = int(str(retry_after_header))
+                except (ValueError, TypeError):
                     pass
 
         if response.status_code in (401, 403):
@@ -395,8 +395,15 @@ class WeatherClient:
             context: Context for error message (e.g., "current weather")
 
         Raises:
-            APIResponseError: If required fields are missing
+            APIResponseError: If required fields are missing or data is not a dict
         """
+        if not isinstance(data, dict):
+            raise APIResponseError(
+                f"API response is not a dictionary for {context}. "
+                f"Received type: {type(data).__name__}. "
+                "This may indicate an API change or malformed response."
+            )
+
         missing = required_fields - set(data.keys())
         if missing:
             raise APIResponseError(
