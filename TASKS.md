@@ -28,7 +28,7 @@
   - Deliverable: tests/test_api.py with 80%+ coverage of client methods and edge cases
 - [x] Write integration tests for full CLI workflow (end-to-end with test API key)
   - Deliverable: tests/test_integration.py using pytest fixtures testing real API calls (or mocked)
-- [ ] Add input validation for location formats and units parameter
+- [x] Add input validation for location formats and units parameter
   - Deliverable: Validation logic in CLI parser rejecting invalid inputs before API call
 
 ## Phase 4: Polish & Documentation

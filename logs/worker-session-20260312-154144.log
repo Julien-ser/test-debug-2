@@ -2416,3 +2416,80 @@ tests/test_integration.py::TestCLIIntegration::test_coordinate_location_accepted
 [0m
 📝 Log saved: logs/iteration-19.md
 📊 Token Usage: 16750 / Session: 44500 / 64000
+✅ Changes committed
+To https://github.com/Julien-ser/test-debug-2.git
+   877622d..b6dcf16  main -> main
+✅ Pushed to GitHub
+📊 Updated Tasks: 11/16 completed, 5 remaining
+   Next task: Add input validation for location formats and units paramete...
+📍 Iteration 20 at Thu Mar 12 03:52:39 PM EDT 2026...
+🤖 OpenCode processing: Add input validation for location formats and units parameter
+[0m
+> build · stepfun/step-3.5-flash:free
+[0m
+I'll complete the input validation task for location formats and units parameter. Let me first explore the current codebase structure to understand where to add validation.
+[0m→ [0mRead TASKS.md
+[0m→ [0mRead README.md
+[0m✱ [0mGlob "**/*.py"[90m 14 matches[0m
+[0m→ [0mRead src/weather_cli/validation.py
+[0m→ [0mRead src/weather_cli/weather.py
+[0m→ [0mRead tests/test_cli.py
+Looking at the code, I can see that input validation is **already implemented**:
+
+1. `validation.py` contains comprehensive validation functions for location, units, and forecast days
+2. `weather.py` imports and uses these validations (lines 62-78)
+3. Tests exist in `test_cli.py` for invalid units, empty/whitespace locations, etc.
+
+The task appears complete but just not marked in TASKS.md. Let me verify the tests are comprehensive and mark the task complete.
+[0m→ [0mRead tests/test_cli.py[90m [offset=180][0m
+The validation feature is fully implemented. Let me run the tests to verify and then mark the task complete in TASKS.md.
+[0m
+[0m$ [0mpython -m pytest tests/test_cli.py -v
+============================= test session starts ==============================
+platform linux -- Python 3.14.3, pytest-7.4.3, pluggy-1.6.0 -- /home/julien/Desktop/Free-Wiggum-opencode/venv/bin/python
+cachedir: .pytest_cache
+rootdir: /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2
+plugins: langsmith-0.7.16, anyio-4.12.1, cov-7.0.0, dash-4.0.0
+collecting ... collected 11 items
+
+tests/test_cli.py::test_weather_command_with_valid_location PASSED       [  9%]
+tests/test_cli.py::test_weather_command_with_imperial_units PASSED       [ 18%]
+tests/test_cli.py::test_weather_command_with_forecast PASSED             [ 27%]
+tests/test_cli.py::test_weather_command_with_json_format PASSED          [ 36%]
+tests/test_cli.py::test_weather_command_with_invalid_units PASSED        [ 45%]
+tests/test_cli.py::test_weather_command_with_invalid_format PASSED       [ 54%]
+tests/test_cli.py::test_weather_command_with_negative_forecast PASSED    [ 63%]
+tests/test_cli.py::test_weather_command_with_excessive_forecast PASSED   [ 72%]
+tests/test_cli.py::test_weather_command_with_empty_location PASSED       [ 81%]
+tests/test_cli.py::test_weather_command_with_whitespace_location PASSED  [ 90%]
+tests/test_cli.py::test_weather_command_help PASSED                      [100%]
+
+============================== 11 passed in 0.06s ==============================
+[0m
+All tests pass. The input validation feature is already fully implemented and tested. Now I'll mark the task as complete in TASKS.md.
+[0m← [0mEdit TASKS.md
+Index: /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/TASKS.md
+===================================================================
+--- /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/TASKS.md
++++ /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/TASKS.md
+@@ -27,9 +27,9 @@
+ - [x] Write unit tests for API client with mocked responses
+   - Deliverable: tests/test_api.py with 80%+ coverage of client methods and edge cases
+ - [x] Write integration tests for full CLI workflow (end-to-end with test API key)
+   - Deliverable: tests/test_integration.py using pytest fixtures testing real API calls (or mocked)
+-- [ ] Add input validation for location formats and units parameter
++- [x] Add input validation for location formats and units parameter
+   - Deliverable: Validation logic in CLI parser rejecting invalid inputs before API call
+ 
+ ## Phase 4: Polish & Documentation
+ - [ ] Add caching layer to reduce API calls for identical requests within 10 minutes
+
+[0m
+Task completed. Input validation is fully implemented with:
+
+- `validation.py` containing `validate_location()`, `validate_units()`, and `validate_forecast_days()`
+- Integration into CLI in `weather.py` (lines 62-78)
+- Comprehensive test coverage in `test_cli.py` (all 11 tests pass)
+- Task marked complete in TASKS.md
+📝 Log saved: logs/iteration-20.md
+📊 Token Usage: 3250 / Session: 47750 / 64000
