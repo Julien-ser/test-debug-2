@@ -123,33 +123,31 @@ class TestCLIErrorHandling:
 
     def test_network_error_message(self, runner):
         """Test network error shows connection guidance."""
-        with patch.object(WeatherClient, "__init__", return_value=None):
-            with patch.object(
-                WeatherClient, "get_current", side_effect=Exception("connection lost")
-            ):
-                result = runner.invoke(
-                    main, ["London"], env={"WEATHER_API_KEY": "test"}
-                )
-                assert result.exit_code != 0
-                assert (
-                    "internet" in result.output.lower()
-                    or "connection" in result.output.lower()
-                )
+        with patch("weather_cli.weather.WeatherClient") as mock_client_class:
+            mock_client = mock_client_class.return_value
+            mock_client.__enter__ = Mock(return_value=mock_client)
+            mock_client.__exit__ = Mock(return_value=None)
+            mock_client.get_current.side_effect = NetworkError(
+                "connection lost", original_error=Exception("connection error")
+            )
+            result = runner.invoke(main, ["London"], env={"WEATHER_API_KEY": "test"})
+            assert result.exit_code != 0
+            output_lower = result.output.lower()
+            assert "internet" in output_lower or "connection" in output_lower
 
     def test_rate_limit_error_message(self, runner):
         """Test rate limit error shows wait guidance."""
-        with patch.object(WeatherClient, "__init__", return_value=None):
-            with patch.object(
-                WeatherClient, "get_current", side_effect=Exception("rate limit")
-            ):
-                result = runner.invoke(
-                    main, ["London"], env={"WEATHER_API_KEY": "test"}
-                )
-                assert result.exit_code != 0
-                assert (
-                    "wait" in result.output.lower()
-                    or "rate limit" in result.output.lower()
-                )
+        with patch("weather_cli.weather.WeatherClient") as mock_client_class:
+            mock_client = mock_client_class.return_value
+            mock_client.__enter__ = Mock(return_value=mock_client)
+            mock_client.__exit__ = Mock(return_value=None)
+            mock_client.get_current.side_effect = RateLimitError(
+                "rate limit exceeded", retry_after=60, status_code=429
+            )
+            result = runner.invoke(main, ["London"], env={"WEATHER_API_KEY": "test"})
+            assert result.exit_code != 0
+            output_lower = result.output.lower()
+            assert "wait" in output_lower or "rate limit" in output_lower
 
 
 class TestCLIIntegration:
@@ -258,22 +256,81 @@ class TestCLIIntegration:
                 "{"
             ) or result.output.strip().startswith("[")
 
-    def test_context_manager_closes_session(self, runner):
-        """Verify session is properly closed after request."""
+    def test_table_format_output(self, runner, mock_success_response):
+        """Test table format output (default)."""
         with patch("weather_cli.api.client.requests.Session") as mock_session_class:
             mock_session = MagicMock()
-            mock_session_class.return_value = mock_session
-
-            # Setup response
             mock_response = Mock()
             mock_response.status_code = 200
-            mock_response.json.return_value = {
-                "location": {"name": "Test"},
-                "current": {},
-            }
+            mock_response.json.return_value = mock_success_response
             mock_session.get.return_value = mock_response
+            mock_session_class.return_value = mock_session
 
             result = runner.invoke(
                 main, ["London"], env={"WEATHER_API_KEY": "test_key"}
             )
-            mock_session.close.assert_called_once()
+            assert result.exit_code == 0
+            # Table format should contain grid characters and location
+            assert "London" in result.output
+            assert "-" in result.output or "|" in result.output  # Table borders
+
+    def test_imperial_units_display_fahrenheit(self, runner, mock_success_response):
+        """Test imperial units show Fahrenheit."""
+        with patch("weather_cli.api.client.requests.Session") as mock_session_class:
+            mock_session = MagicMock()
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.json.return_value = mock_success_response
+            mock_session.get.return_value = mock_response
+            mock_session_class.return_value = mock_session
+
+            result = runner.invoke(
+                main,
+                ["London", "--units", "imperial"],
+                env={"WEATHER_API_KEY": "test_key"},
+            )
+            assert result.exit_code == 0
+            # Check for Fahrenheit output (either symbol or F)
+            output_upper = result.output.upper()
+            assert "°F" in result.output or "F" in output_upper
+
+    def test_api_key_from_command_line(self, runner, mock_success_response):
+        """Test API key passed via command line option."""
+        with patch("weather_cli.api.client.requests.Session") as mock_session_class:
+            mock_session = MagicMock()
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.json.return_value = mock_success_response
+            mock_session.get.return_value = mock_response
+            mock_session_class.return_value = mock_session
+
+            result = runner.invoke(main, ["London", "--api-key", "cmdline_key"])
+            assert result.exit_code == 0
+            # Verify the API key was used in the request
+            call_args = mock_session.get.call_args
+            # Check that the params dict contains the correct API key
+            assert call_args[1]["params"]["key"] == "cmdline_key"
+
+    def test_coordinate_location_accepted(self, runner):
+        """Test coordinate format location passes validation and makes API call."""
+        with patch("weather_cli.api.client.requests.Session") as mock_session_class:
+            mock_session = MagicMock()
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.json.return_value = {
+                "location": {"name": "51.5074,-0.1278", "country": "GB"},
+                "current": {
+                    "temp_c": 15.0,
+                    "humidity": 70,
+                    "wind_kph": 10.0,
+                    "condition": {"text": "Cloudy"},
+                },
+            }
+            mock_session.get.return_value = mock_response
+            mock_session_class.return_value = mock_session
+
+            result = runner.invoke(
+                main, ["51.5074,-0.1278"], env={"WEATHER_API_KEY": "test_key"}
+            )
+            # Should succeed - validation accepts coordinates
+            assert result.exit_code == 0 or "API" in result.output

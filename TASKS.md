@@ -26,7 +26,7 @@
   - Deliverable: exceptions.py with custom exceptions and try/except blocks returning user-friendly error messages
 - [x] Write unit tests for API client with mocked responses
   - Deliverable: tests/test_api.py with 80%+ coverage of client methods and edge cases
-- [ ] Write integration tests for full CLI workflow (end-to-end with test API key)
+- [x] Write integration tests for full CLI workflow (end-to-end with test API key)
   - Deliverable: tests/test_integration.py using pytest fixtures testing real API calls (or mocked)
 - [ ] Add input validation for location formats and units parameter
   - Deliverable: Validation logic in CLI parser rejecting invalid inputs before API call

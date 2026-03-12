@@ -85,7 +85,10 @@ def test_weather_command_with_forecast(runner):
     """Test weather command with forecast option."""
     forecast_data = {
         "location": {"name": "Paris", "country": "FR"},
-        "current": {"last_updated": "2024-01-15 10:30"},
+        "current": {
+            "last_updated": "2024-01-15 10:30",
+            "temp_c": 15.0,  # Required by validation
+        },
         "forecast": {
             "forecastday": [
                 {
