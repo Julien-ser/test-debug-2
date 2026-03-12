@@ -95,10 +95,10 @@ class TestCLIValidation:
 class TestCLIErrorHandling:
     """Tests for CLI error handling and user-friendly messages."""
 
-    @pytest.fixture
-    def runner(self):
-        """Create a CLI runner for testing."""
-        return CliRunner()
+     @pytest.fixture
+     def runner(self):
+         """Create a CLI runner for testing."""
+         return CliRunner()
 
      def test_authentication_error_message(self, runner):
          """Test authentication error shows helpful guidance."""

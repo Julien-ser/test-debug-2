@@ -17,9 +17,15 @@ class WeatherCLIError(Exception):
 class AuthenticationError(WeatherCLIError):
     """Raised when API authentication fails."""
 
-    def __init__(self, message: str, status_code: Optional[int] = None) -> None:
+    def __init__(
+        self,
+        message: str,
+        status_code: Optional[int] = None,
+        original_error: Optional[Exception] = None,
+    ) -> None:
         super().__init__(message)
         self.status_code = status_code
+        self.original_error = original_error
 
 
 class InvalidLocationError(WeatherCLIError):
@@ -44,10 +50,12 @@ class RateLimitError(WeatherCLIError):
         message: str,
         retry_after: Optional[int] = None,
         status_code: Optional[int] = None,
+        original_error: Optional[Exception] = None,
     ) -> None:
         super().__init__(message)
         self.retry_after = retry_after
         self.status_code = status_code
+        self.original_error = original_error
 
 
 class NetworkError(WeatherCLIError):
@@ -58,6 +66,28 @@ class NetworkError(WeatherCLIError):
     ) -> None:
         super().__init__(message)
         self.original_error = original_error
+
+
+class DNSLookupError(NetworkError):
+    """Raised when DNS resolution fails."""
+
+    def __init__(
+        self,
+        message: str = "DNS resolution failed. Please check your internet connection and domain name.",
+        original_error: Optional[Exception] = None,
+    ) -> None:
+        super().__init__(message, original_error)
+
+
+class SSLVerificationError(NetworkError):
+    """Raised when SSL/TLS verification fails."""
+
+    def __init__(
+        self,
+        message: str = "SSL/TLS verification failed. This may indicate a network issue or man-in-the-middle attack.",
+        original_error: Optional[Exception] = None,
+    ) -> None:
+        super().__init__(message, original_error)
 
 
 class APIResponseError(WeatherCLIError):
