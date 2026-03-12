@@ -1441,3 +1441,27 @@ Perfect! I've completed the task. Here's a summary:
 The test suite now provides comprehensive coverage of the WeatherClient class, including success paths, error handling, retry mechanisms, and edge cases.
 📝 Log saved: logs/iteration-17.md
 📊 Token Usage: 14000 / Session: 25250 / 64000
+✅ Changes committed
+To https://github.com/Julien-ser/test-debug-2.git
+   63a3a9a..9e06699  main -> main
+✅ Pushed to GitHub
+📊 Updated Tasks: 10/16 completed, 6 remaining
+   Next task: Write integration tests for full CLI workflow (end-to-end wi...
+📍 Iteration 18 at Thu Mar 12 03:48:44 PM EDT 2026...
+🤖 OpenCode processing: Write integration tests for full CLI workflow (end-to-end with test API key)
+[0m
+> build · stepfun/step-3.5-flash:free
+[0m
+I'll help you write integration tests for the full CLI workflow. Let me first explore the project structure to understand what's been built.
+[0m→ [0mRead TASKS.md
+[0m→ [0mRead README.md
+[0m✱ [0mGlob "**/*.py"[90m 14 matches[0m
+Let me examine the existing code to understand the project structure:
+[0m→ [0mRead tests/test_integration.py
+[0m→ [0mRead src/weather_cli/weather.py
+[0m→ [0mRead src/weather_cli/api/client.py
+Let me also check the existing unit tests and models:
+[0m→ [0mRead tests/test_api.py
+[0m→ [0mRead src/weather_cli/models.py
+📝 Log saved: logs/iteration-18.md
+📊 Token Usage: 2500 / Session: 27750 / 64000
