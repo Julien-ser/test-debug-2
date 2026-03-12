@@ -56,16 +56,15 @@ class WeatherClient:
         self.session = requests.Session()
         self.session.headers.update({"User-Agent": "weather-cli/0.1.0"})
 
-    def get_current(self, location: str, units: str = "metric") -> Dict[str, Any]:
+    def get_current(self, location: str) -> Dict[str, Any]:
         """
         Fetch current weather for a location.
 
         Args:
             location: City name, coordinates (lat,lon), or other location formats
-            units: Either "metric" or "imperial"
 
         Returns:
-            Dictionary with current weather data
+            Dictionary with current weather data (includes both metric and imperial values)
 
         Raises:
             InvalidLocationError: If location is not found
@@ -91,19 +90,16 @@ class WeatherClient:
         except RequestException as e:
             raise WeatherAPIError(f"Network error: {str(e)}") from e
 
-    def get_forecast(
-        self, location: str, days: int = 3, units: str = "metric"
-    ) -> Dict[str, Any]:
+    def get_forecast(self, location: str, days: int = 3) -> Dict[str, Any]:
         """
         Fetch weather forecast for a location.
 
         Args:
             location: City name, coordinates (lat,lon), or other location formats
             days: Number of forecast days (1-15)
-            units: Either "metric" or "imperial"
 
         Returns:
-            Dictionary with forecast data including current + forecast days
+            Dictionary with forecast data including current + forecast days (contains both metric and imperial values)
 
         Raises:
             ValueError: If days is out of valid range (1-15)

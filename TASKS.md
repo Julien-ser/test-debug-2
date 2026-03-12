@@ -14,7 +14,7 @@
 ## Phase 2: Core Development
 - [x] Implement base CLI command structure with argument parsing for location and units
   - Deliverable: weather.py with `weather <location> [--units imperial|metric]` command working
-- [ ] Create weather API client class with authentication handling and request logic
+- [x] Create weather API client class with authentication handling and request logic
   - Deliverable: api/client.py with `WeatherClient.get_current()` and `WeatherClient.get_forecast(days)` methods
 - [ ] Design and implement data models for weather responses
   - Deliverable: models.py with @dataclass definitions for CurrentWeather and ForecastItem (temp, humidity, wind_speed, description, timestamp)
