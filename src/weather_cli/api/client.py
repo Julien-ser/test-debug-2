@@ -17,6 +17,7 @@ from requests.exceptions import (
     HTTPError,
 )
 
+from weather_cli import cache
 from weather_cli.exceptions import (
     WeatherCLIError,
     AuthenticationError,
@@ -58,6 +59,8 @@ class WeatherClient:
         self.max_retries = max_retries
         self.session = requests.Session()
         self.session.headers.update({"User-Agent": "weather-cli/0.1.0"})
+        # Install caching on this session with 10-minute TTL
+        cache.install_cache(self.session, ttl=600)
 
     def get_current(self, location: str) -> Dict[str, Any]:
         """

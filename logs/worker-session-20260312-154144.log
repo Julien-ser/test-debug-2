@@ -2493,3 +2493,120 @@ Task completed. Input validation is fully implemented with:
 - Task marked complete in TASKS.md
 📝 Log saved: logs/iteration-20.md
 📊 Token Usage: 3250 / Session: 47750 / 64000
+✅ Changes committed
+To https://github.com/Julien-ser/test-debug-2.git
+   b6dcf16..bf1e7bd  main -> main
+✅ Pushed to GitHub
+📊 Updated Tasks: 12/16 completed, 4 remaining
+   Next task: Add caching layer to reduce API calls for identical requests...
+📍 Iteration 21 at Thu Mar 12 03:53:20 PM EDT 2026...
+🤖 OpenCode processing: Add caching layer to reduce API calls for identical requests within 10 minutes
+[0m
+> build · stepfun/step-3.5-flash:free
+[0m
+I'll implement the caching layer for the weather CLI tool. Let me first explore the project structure to understand the existing code.
+[0m→ [0mRead TASKS.md
+[0m→ [0mRead README.md
+[0m✱ [0mGlob "**/*.py"[90m 14 matches[0m
+[0m→ [0mRead src/weather_cli/api/client.py
+[0m→ [0mRead pyproject.toml
+[0m→ [0mRead tests/test_api.py
+[0m
+[0m# [0mTodos
+[ ] Add requests-cache to pyproject.toml dependencies
+[ ] Create cache.py module with caching configuration
+[ ] Modify WeatherClient to use cached session
+[ ] Write unit tests for caching functionality
+[ ] Mark caching task as complete in TASKS.md
+[ ] Update README.md to reflect current progress
+[0m
+Now I'll create a todo list to track the implementation steps:
+[0m# [0mTodos
+[ ] Add requests-cache to pyproject.toml dependencies
+[ ] Create cache.py module with caching configuration
+[ ] Modify WeatherClient to use cached session
+[ ] Write unit tests for caching functionality
+[ ] Mark caching task as complete in TASKS.md
+[ ] Update README.md to reflect current progress
+[0m
+[0m← [0mEdit pyproject.toml
+Index: /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/pyproject.toml
+===================================================================
+--- /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/pyproject.toml
++++ /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/pyproject.toml
+@@ -22,8 +22,9 @@
+     "Programming Language :: Python :: 3.12",
+ ]
+ dependencies = [
+     "requests>=2.25.0",
++    "requests-cache>=1.0.0",
+     "click>=8.0.0",
+     "tabulate>=0.8.0",
+     "pytest>=6.0.0",
+ ]
+
+[0m
+[0m# [0mTodos
+[x] Add requests-cache to pyproject.toml dependencies
+[ ] Create cache.py module with caching configuration
+[ ] Modify WeatherClient to use cached session
+[ ] Write unit tests for caching functionality
+[ ] Mark caching task as complete in TASKS.md
+[ ] Update README.md to reflect current progress
+[0m
+Now I'll create the cache.py module:
+[0m← [0mWrite src/weather_cli/cache.py
+Wrote file successfully.
+
+LSP errors detected in other files:
+<diagnostics file="/home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/src/weather_cli/api/client.py">
+ERROR [62:45] Function with declared return type "Dict[str, Any]" must return value on all code paths
+  "None" is not assignable to "Dict[str, Any]"
+ERROR [176:61] Function with declared return type "Dict[str, Any]" must return value on all code paths
+  "None" is not assignable to "Dict[str, Any]"
+</diagnostics>
+
+LSP errors detected in other files:
+<diagnostics file="/home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/tests/test_api.py">
+ERROR [47:27] Argument of type "None" cannot be assigned to parameter "api_key" of type "str" in function "__init__"
+  "None" is not assignable to "str"
+</diagnostics>
+[0m
+Now I'll modify the WeatherClient to use the caching layer:
+[0m← [0mEdit src/weather_cli/api/client.py
+Index: /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/src/weather_cli/api/client.py
+===================================================================
+--- /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/src/weather_cli/api/client.py
++++ /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/src/weather_cli/api/client.py
+@@ -16,8 +16,9 @@
+     SSLError,
+     HTTPError,
+ )
+ 
++from weather_cli import cache
+ from weather_cli.exceptions import (
+     WeatherCLIError,
+     AuthenticationError,
+     InvalidLocationError,
+
+[0m
+[0m← [0mEdit src/weather_cli/api/client.py
+Index: /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/src/weather_cli/api/client.py
+===================================================================
+--- /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/src/weather_cli/api/client.py
++++ /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/src/weather_cli/api/client.py
+@@ -58,8 +58,10 @@
+     self.api_key = api_key.strip()
+     self.max_retries = max_retries
+     self.session = requests.Session()
+     self.session.headers.update({"User-Agent": "weather-cli/0.1.0"})
++    # Install caching on this session with 10-minute TTL
++    cache.install_cache(self.session, ttl=600)
+ 
+ def get_current(self, location: str) -> Dict[str, Any]:
+     """
+     Fetch current weather for a location with retry logic for transient failures.
+
+[0m
+📝 Log saved: logs/iteration-21.md
+📊 Token Usage: 3250 / Session: 51000 / 64000
