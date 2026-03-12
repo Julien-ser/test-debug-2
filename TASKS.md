@@ -12,7 +12,7 @@
   - Deliverable: Directory structure with src/weather_cli/, tests/, docs/ and initial commit
 
 ## Phase 2: Core Development
-- [ ] Implement base CLI command structure with argument parsing for location and units
+- [x] Implement base CLI command structure with argument parsing for location and units
   - Deliverable: weather.py with `weather <location> [--units imperial|metric]` command working
 - [ ] Create weather API client class with authentication handling and request logic
   - Deliverable: api/client.py with `WeatherClient.get_current()` and `WeatherClient.get_forecast(days)` methods

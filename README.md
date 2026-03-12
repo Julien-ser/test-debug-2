@@ -21,7 +21,11 @@ A Python command-line tool that fetches and displays weather information using t
  - ✅ Project structure and Git repository initialized
  - ✅ Initial Git commit
 
-**Phase 2: Core Development** - Pending
+**Phase 2: Core Development** - In Progress
+  - ✅ Base CLI command structure with argument parsing (location, units, format, forecast)
+  - ⏳ API client implementation
+  - ⏳ Data models
+  - ⏳ Output formatters
 
 ## Technology Stack
 

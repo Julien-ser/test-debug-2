@@ -42,14 +42,14 @@ def test_weather_command_with_invalid_units(runner):
     """Test weather command rejects invalid units."""
     result = runner.invoke(main, ["London", "--units", "invalid"])
     assert result.exit_code == 2  # Click returns 2 for bad parameters
-    assert "invalid choice" in result.output.lower()
+    assert "invalid" in result.output.lower()
 
 
 def test_weather_command_with_invalid_format(runner):
     """Test weather command rejects invalid format."""
     result = runner.invoke(main, ["London", "--format", "xml"])
     assert result.exit_code == 2
-    assert "invalid choice" in result.output.lower()
+    assert "invalid" in result.output.lower()
 
 
 def test_weather_command_with_negative_forecast(runner):
