@@ -55,7 +55,7 @@ weather-cli Tokyo --format json
 
 **Phase 4: Polish & Documentation** - 🔄 In Progress
 - ✅ Comprehensive README with installation, usage examples, and troubleshooting (this document)
-- ⏳ Config file support for default API key and units (not yet implemented)
+- ✅ Config file support for default API key and units (implemented via ~/.config/weather-cli/config.yml)
 - ⏳ Package the tool for PyPI distribution and create installation instructions
 
 ## Technology Stack
@@ -128,11 +128,49 @@ You can also pass the API key directly with the `--api-key` option:
 weather-cli London --api-key your_api_key_here --units metric
 ```
 
-**Note:** The config file feature (`~/.config/weather-cli/config.yml`) is planned but not yet implemented. Currently, only environment variables or the `--api-key` option are supported.
+#### Configuration File
+
+You can store your API key and default units in a configuration file, avoiding the need to set environment variables manually each session.
+
+**File Location:** `~/.config/weather-cli/config.yml` (XDG standard) or legacy `~/.weather-cli/config.yml`.
+
+**File Format** (YAML):
+```yaml
+# Weather CLI Configuration
+api_key: "your_api_key_here"
+default_units: metric  # optional, defaults to metric
+```
+
+**Setup:**
+
+1. Create the config directory and file:
+   ```bash
+   mkdir -p ~/.config/weather-cli
+   nano ~/.config/weather-cli/config.yml
+   ```
+
+2. Add your API key and optionally set `default_units` to `metric` or `imperial`.
+
+3. Secure the file (recommended):
+   ```bash
+   chmod 600 ~/.config/weather-cli/config.yml
+   ```
+
+**Configuration Precedence** (highest to lowest):
+- Command-line options (`--api-key`, `--units`)
+- Environment variables (`WEATHER_API_KEY`, `WEATHER_UNITS`)
+- Configuration file (`~/.config/weather-cli/config.yml`)
+
+**Example:** Once configured, simply run:
+```bash
+weather London
+weather "New York" --forecast 5
+```
+No need to pass `--api-key` or set environment variables.
 
 ## Usage
 
-All commands require a WeatherAPI.com API key (set via `WEATHER_API_KEY` environment variable or `--api-key` option).
+All commands require a WeatherAPI.com API key (set via `WEATHER_API_KEY` environment variable, `--api-key` option, or config file).
 
 ### Current Weather
 

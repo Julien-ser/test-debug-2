@@ -10,6 +10,7 @@ from weather_cli.api.client import (
     RateLimitError,
     NetworkError,
 )
+from weather_cli.config import get_api_key as get_config_api_key, get_default_units
 from weather_cli.validation import (
     validate_location,
     validate_units,
@@ -24,8 +25,8 @@ from weather_cli.display.format import format_current, format_forecast
 @click.option(
     "--units",
     type=click.Choice(["imperial", "metric"]),
-    default="metric",
-    help="Units for temperature: imperial (°F) or metric (°C)",
+    default=None,
+    help="Units for temperature: imperial (°F) or metric (°C). Default from config or metric.",
 )
 @click.option(
     "--format",
@@ -45,15 +46,19 @@ from weather_cli.display.format import format_current, format_forecast
     help="WeatherAPI.com API key (can also set WEATHER_API_KEY env var)",
 )
 def main(
-    location: str, units: str, format: str, forecast: int, api_key: Optional[str]
+    location: str,
+    units: Optional[str],
+    format: str,
+    forecast: int,
+    api_key: Optional[str],
 ) -> None:
     """
     Weather CLI tool - Fetch and display weather information for any location.
 
     Example: weather London --units metric
 
-    Requires a WeatherAPI.com API key. Set WEATHER_API_KEY environment variable
-    or use --api-key option.
+    Requires a WeatherAPI.com API key. Set WEATHER_API_KEY environment variable,
+    use --api-key option, or configure via ~/.config/weather-cli/config.yml.
     """
     # Comprehensive input validation
     location = location.strip()
@@ -67,23 +72,41 @@ def main(
             param_hint="location",
         )
 
-    # Validate units
-    is_valid_units, units_error = validate_units(units)
-    if not is_valid_units:
-        raise click.BadParameter(units_error, param_hint="--units")
+    # Resolve units: CLI arg > config default > metric fallback (via config.get_default_units)
+    if units is None:
+        try:
+            units = get_default_units()
+        except Exception as e:
+            raise click.UsageError(
+                f"Error loading default units from config: {str(e)}\n"
+                "Please set --units explicitly or check your configuration."
+            )
+    else:
+        is_valid_units, units_error = validate_units(units)
+        if not is_valid_units:
+            raise click.BadParameter(units_error, param_hint="--units")
 
     # Validate forecast days
     is_valid_days, days_error = validate_forecast_days(forecast)
     if not is_valid_days:
         raise click.BadParameter(days_error, param_hint="--forecast")
 
-    # Get API key
+    # Get API key: CLI arg > env var > config file
     if not api_key:
-        api_key = os.environ.get("WEATHER_API_KEY", "").strip()
+        try:
+            api_key_from_config = get_config_api_key()
+            if api_key_from_config:
+                api_key = api_key_from_config
+        except Exception as e:
+            raise click.UsageError(
+                f"Error loading API key from configuration: {str(e)}\n"
+                "Please set your API key via --api-key option or WEATHER_API_KEY environment variable."
+            )
 
     if not api_key:
         raise click.UsageError(
-            "API key required. Set WEATHER_API_KEY environment variable or use --api-key option.\n"
+            "API key required. Set WEATHER_API_KEY environment variable, use --api-key option, "
+            "or configure via ~/.config/weather-cli/config.yml.\n"
             "Example: export WEATHER_API_KEY=your_key_here"
         )
 
