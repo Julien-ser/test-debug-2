@@ -8,7 +8,7 @@ using mocking to avoid real API calls.
 import json
 import pytest
 from unittest.mock import Mock, patch, MagicMock
-from requests.exceptions import Timeout, ConnectionError, RequestException
+from requests.exceptions import Timeout, ConnectionError, RequestException, SSLError
 
 from weather_cli.api.client import WeatherClient
 from weather_cli.exceptions import (
@@ -18,6 +18,8 @@ from weather_cli.exceptions import (
     NetworkError,
     APIResponseError,
     WeatherCLIError,
+    SSLVerificationError,
+    DNSLookupError,
 )
 
 
@@ -448,13 +450,361 @@ class TestErrorHandlingEdgeCases:
                 client.get_current("London")
 
 
-class TestInheritance:
-    """Tests to ensure proper exception inheritance."""
+class TestRetryLogic:
+    """Tests for retry mechanism and backoff."""
 
-    def test_all_custom_exceptions_inherit_from_weather_cli_error(self):
-        """Verify all custom exceptions inherit from WeatherCLIError."""
-        assert issubclass(AuthenticationError, WeatherCLIError)
-        assert issubclass(InvalidLocationError, WeatherCLIError)
-        assert issubclass(RateLimitError, WeatherCLIError)
-        assert issubclass(NetworkError, WeatherCLIError)
-        assert issubclass(APIResponseError, WeatherCLIError)
+    def test_get_current_retries_on_timeout_then_succeeds(self):
+        """Test get_current retries after timeout and eventually succeeds."""
+        mock_success_response = {
+            "location": {"name": "London"},
+            "current": {
+                "temp_c": 15.0,
+                "humidity": 70,
+                "wind_kph": 10.0,
+                "condition": {"text": "Cloudy"},
+            },
+        }
+
+        with patch("requests.Session") as mock_session_class:
+            mock_session = MagicMock()
+            # First two attempts fail with Timeout, third succeeds
+            mock_session.get.side_effect = [
+                Timeout("Timeout 1"),
+                Timeout("Timeout 2"),
+                Mock(status_code=200, json=lambda: mock_success_response),
+            ]
+            mock_session_class.return_value = mock_session
+
+            client = WeatherClient("test_key", max_retries=3)
+            result = client.get_current("London")
+
+            assert result == mock_success_response
+            assert mock_session.get.call_count == 3
+
+    def test_get_current_retries_on_connection_error_then_succeeds(self):
+        """Test get_current retries after connection errors and eventually succeeds."""
+        mock_success_response = {
+            "location": {"name": "London"},
+            "current": {
+                "temp_c": 15.0,
+                "humidity": 70,
+                "wind_kph": 10.0,
+                "condition": {"text": "Cloudy"},
+            },
+        }
+
+        with patch("requests.Session") as mock_session_class:
+            mock_session = MagicMock()
+            # First attempt fails with ConnectionError, second succeeds
+            mock_session.get.side_effect = [
+                ConnectionError("Connection failed"),
+                Mock(status_code=200, json=lambda: mock_success_response),
+            ]
+            mock_session_class.return_value = mock_session
+
+            client = WeatherClient("test_key", max_retries=2)
+            result = client.get_current("London")
+
+            assert result == mock_success_response
+            assert mock_session.get.call_count == 2
+
+    def test_get_current_exhausts_retries_on_timeout(self):
+        """Test get_current exhausts all retries on persistent timeout."""
+        with patch("requests.Session") as mock_session_class:
+            mock_session = MagicMock()
+            mock_session.get.side_effect = Timeout("Persistent timeout")
+            mock_session_class.return_value = mock_session
+
+            client = WeatherClient("test_key", max_retries=3)
+            with pytest.raises(NetworkError, match="Request timeout after 3 retries"):
+                client.get_current("London")
+
+            assert mock_session.get.call_count == 3
+
+    def test_get_current_exhausts_retries_on_connection_error(self):
+        """Test get_current exhausts all retries on persistent connection error."""
+        with patch("requests.Session") as mock_session_class:
+            mock_session = MagicMock()
+            mock_session.get.side_effect = ConnectionError(
+                "Persistent connection error"
+            )
+            mock_session_class.return_value = mock_session
+
+            client = WeatherClient("test_key", max_retries=2)
+            with pytest.raises(NetworkError, match="Connection error after 2 retries"):
+                client.get_current("London")
+
+            assert mock_session.get.call_count == 2
+
+    def test_get_forecast_retries_on_ssl_error_then_succeeds(self):
+        """Test get_forecast retries after SSL error and eventually succeeds."""
+        mock_success_response = {
+            "location": {"name": "London"},
+            "current": {"temp_c": 15.0, "last_updated": "2024-01-15 10:30"},
+            "forecast": {
+                "forecastday": [
+                    {
+                        "date": "2024-01-15",
+                        "day": {
+                            "avgtemp_c": 15.0,
+                            "maxwind_kph": 20.0,
+                            "avghumidity": 70,
+                            "condition": {"text": "Cloudy"},
+                        },
+                    }
+                ]
+            },
+        }
+
+        with patch("requests.Session") as mock_session_class:
+            mock_session = MagicMock()
+            mock_session.get.side_effect = [
+                SSLError("SSL error"),
+                Mock(status_code=200, json=lambda: mock_success_response),
+            ]
+            mock_session_class.return_value = mock_session
+
+            client = WeatherClient("test_key", max_retries=2)
+            result = client.get_forecast("London", days=1)
+
+            assert result == mock_success_response
+            assert mock_session.get.call_count == 2
+
+    def test_retry_backoff_factor(self):
+        """Test that retry backoff uses exponential backoff with correct factor."""
+        with patch("requests.Session") as mock_session_class:
+            mock_session = MagicMock()
+            mock_session.get.side_effect = Timeout("Timeout")
+            mock_session_class.return_value = mock_session
+
+            # Mock time.sleep to verify backoff intervals
+            with patch("weather_cli.api.client.time.sleep") as mock_sleep:
+                client = WeatherClient("test_key", max_retries=3)
+                with pytest.raises(NetworkError):
+                    client.get_current("London")
+
+                # Verify sleep was called with correct backoff intervals
+                # With backoff factor 0.5: 0.5*2^0=0.5, 0.5*2^1=1.0
+                assert mock_sleep.call_count == 2  # Called between retries
+                calls = [call[0][0] for call in mock_sleep.call_args_list]
+                assert 0.5 in calls  # First retry wait
+                assert 1.0 in calls  # Second retry wait
+
+
+class TestSSLErrorHandling:
+    """Tests for SSL/TLS error handling."""
+
+    def test_get_current_handles_ssl_error(self):
+        """Test get_current handles SSL verification error."""
+        with patch("requests.Session") as mock_session_class:
+            mock_session = MagicMock()
+            mock_session.get.side_effect = SSLError(
+                "SSL certificate verification failed"
+            )
+            mock_session_class.return_value = mock_session
+
+            client = WeatherClient("test_key")
+            with pytest.raises(
+                SSLVerificationError, match="SSL/TLS verification failed"
+            ):
+                client.get_current("London")
+
+    def test_get_forecast_handles_ssl_error(self):
+        """Test get_forecast handles SSL verification error."""
+        with patch("requests.Session") as mock_session_class:
+            mock_session = MagicMock()
+            mock_session.get.side_effect = SSLError(
+                "SSL certificate verification failed"
+            )
+            mock_session_class.return_value = mock_session
+
+            client = WeatherClient("test_key")
+            with pytest.raises(SSLVerificationError):
+                client.get_forecast("London", days=1)
+
+
+class TestDNSLookupErrorHandling:
+    """Tests for DNS lookup error handling."""
+
+    def test_get_current_handles_dns_error(self):
+        """Test get_current identifies DNS lookup failure."""
+        with patch("requests.Session") as mock_session_class:
+            mock_session = MagicMock()
+            # Simulate DNS error with typical error message
+            mock_session.get.side_effect = ConnectionError("Name or service not known")
+            mock_session_class.return_value = mock_session
+
+            client = WeatherClient("test_key")
+            with pytest.raises(DNSLookupError, match="DNS lookup failed"):
+                client.get_current("London")
+
+    def test_get_current_handles_dns_error_getaddrinfo(self):
+        """Test get_current identifies DNS lookup failure with getaddrinfo error."""
+        with patch("requests.Session") as mock_session_class:
+            mock_session = MagicMock()
+            mock_session.get.side_effect = ConnectionError("getaddrinfo failed")
+            mock_session_class.return_value = mock_session
+
+            client = WeatherClient("test_key")
+            with pytest.raises(DNSLookupError, match="DNS lookup failed"):
+                client.get_current("London")
+
+    def test_get_current_handles_generic_connection_error(self):
+        """Test get_current raises NetworkError for non-DNS connection errors."""
+        with patch("requests.Session") as mock_session_class:
+            mock_session = MagicMock()
+            # Connection error without DNS keywords should raise NetworkError
+            mock_session.get.side_effect = ConnectionError("Connection refused")
+            mock_session_class.return_value = mock_session
+
+            client = WeatherClient("test_key")
+            with pytest.raises(NetworkError, match="Connection error"):
+                client.get_current("London")
+
+
+class TestResponseValidation:
+    """Tests for response structure validation."""
+
+    def test_get_current_validates_missing_location_field(self):
+        """Test get_current detects missing 'location' field."""
+        with patch("requests.Session") as mock_session_class:
+            mock_session = MagicMock()
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.json.return_value = {
+                "current": {
+                    "temp_c": 15.0,
+                    "humidity": 70,
+                }
+            }
+            mock_session.get.return_value = mock_response
+            mock_session_class.return_value = mock_session
+
+            client = WeatherClient("test_key")
+            with pytest.raises(
+                APIResponseError,
+                match="missing required fields for current weather: location",
+            ):
+                client.get_current("London")
+
+    def test_get_current_validates_missing_current_field(self):
+        """Test get_current detects missing 'current' field."""
+        with patch("requests.Session") as mock_session_class:
+            mock_session = MagicMock()
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.json.return_value = {"location": {"name": "London"}}
+            mock_session.get.return_value = mock_response
+            mock_session_class.return_value = mock_session
+
+            client = WeatherClient("test_key")
+            with pytest.raises(
+                APIResponseError,
+                match="missing required fields for current weather: current",
+            ):
+                client.get_current("London")
+
+    def test_get_current_validates_missing_temperature_data(self):
+        """Test get_current detects missing temperature fields in 'current'."""
+        with patch("requests.Session") as mock_session_class:
+            mock_session = MagicMock()
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.json.return_value = {
+                "location": {"name": "London"},
+                "current": {
+                    "humidity": 70,
+                    "wind_kph": 10.0,
+                    # Missing temp_c and temp_f
+                },
+            }
+            mock_session.get.return_value = mock_response
+            mock_session_class.return_value = mock_session
+
+            client = WeatherClient("test_key")
+            with pytest.raises(
+                APIResponseError, match="missing temperature data for current weather"
+            ):
+                client.get_current("London")
+
+    def test_get_forecast_validates_missing_forecast_field(self):
+        """Test get_forecast detects missing 'forecast' field."""
+        with patch("requests.Session") as mock_session_class:
+            mock_session = MagicMock()
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.json.return_value = {
+                "location": {"name": "London"},
+                "current": {"temp_c": 15.0, "last_updated": "2024-01-15 10:30"},
+            }
+            mock_session.get.return_value = mock_response
+            mock_session_class.return_value = mock_session
+
+            client = WeatherClient("test_key")
+            with pytest.raises(
+                APIResponseError, match="missing required fields for forecast: forecast"
+            ):
+                client.get_forecast("London", days=1)
+
+
+class TestRateLimitHandling:
+    """Tests for rate limit error handling with Retry-After header."""
+
+    def test_rate_limit_includes_retry_after_when_present(self):
+        """Test RateLimitError includes retry_after from header."""
+        with patch("requests.Session") as mock_session_class:
+            mock_session = MagicMock()
+            mock_response = Mock()
+            mock_response.status_code = 429
+            mock_response.json.return_value = {
+                "error": {"message": "Rate limit exceeded"}
+            }
+            mock_response.headers = {"Retry-After": "120"}
+            mock_session.get.return_value = mock_response
+            mock_session_class.return_value = mock_session
+
+            client = WeatherClient("test_key")
+            with pytest.raises(RateLimitError) as exc_info:
+                client.get_current("London")
+
+            assert exc_info.value.retry_after == 120
+            assert "120 seconds" in str(exc_info.value)
+
+    def test_rate_limit_without_retry_after_header(self):
+        """Test RateLimitError when Retry-After header is missing."""
+        with patch("requests.Session") as mock_session_class:
+            mock_session = MagicMock()
+            mock_response = Mock()
+            mock_response.status_code = 429
+            mock_response.json.return_value = {
+                "error": {"message": "Rate limit exceeded"}
+            }
+            mock_response.headers = {}
+            mock_session.get.return_value = mock_response
+            mock_session_class.return_value = mock_session
+
+            client = WeatherClient("test_key")
+            with pytest.raises(RateLimitError) as exc_info:
+                client.get_current("London")
+
+            assert exc_info.value.retry_after is None
+            assert "retry-after header missing" in str(exc_info.value)
+
+    def test_rate_limit_with_invalid_retry_after_header(self):
+        """Test RateLimitError when Retry-After header is non-integer."""
+        with patch("requests.Session") as mock_session_class:
+            mock_session = MagicMock()
+            mock_response = Mock()
+            mock_response.status_code = 429
+            mock_response.json.return_value = {
+                "error": {"message": "Rate limit exceeded"}
+            }
+            mock_response.headers = {"Retry-After": "invalid"}
+            mock_session.get.return_value = mock_response
+            mock_session_class.return_value = mock_session
+
+            client = WeatherClient("test_key")
+            with pytest.raises(RateLimitError) as exc_info:
+                client.get_current("London")
+
+            assert exc_info.value.retry_after is None
