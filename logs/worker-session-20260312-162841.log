@@ -1127,3 +1127,14 @@ ERROR tests/test_integration.py
 [0m
 Let me read TASKS.md to verify the sed command will match:
 [0m→ [0mRead TASKS.md[90m [limit=50][0m
+[0m
+[0m$ [0mgit add . && git commit -m "Feature: Comprehensive README with installation, usage examples, and troubleshooting" && git push origin main
+[main 8e6be61] Feature: Comprehensive README with installation, usage examples, and troubleshooting
+ 3 files changed, 826 insertions(+), 15 deletions(-)
+ create mode 100644 logs/iteration-25.md
+To https://github.com/Julien-ser/test-debug-2.git
+   d5d22c3..8e6be61  main -> main
+[0m
+Task completed: README updated, TASKS.md marked, and changes pushed.
+📝 Log saved: logs/iteration-25.md
+📊 Token Usage: 6000 / Session: 17750 / 64000
