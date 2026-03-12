@@ -53,10 +53,10 @@ weather-cli Tokyo --format json
 - ✅ Input validation for location formats (city names, coordinates, postal codes), units parameter, and forecast days (1-15)
 - ✅ Caching layer implemented with 10-minute TTL using requests-cache
 
-**Phase 4: Polish & Documentation** - 🔄 In Progress
+**Phase 4: Polish & Documentation** - ✅ Completed
 - ✅ Comprehensive README with installation, usage examples, and troubleshooting (this document)
 - ✅ Config file support for default API key and units (implemented via ~/.config/weather-cli/config.yml)
-- ⏳ Package the tool for PyPI distribution and create installation instructions
+- ✅ Package the tool for PyPI distribution and create installation instructions
 
 ## Technology Stack
 

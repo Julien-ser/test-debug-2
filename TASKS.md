@@ -38,6 +38,6 @@
   - Deliverable: README.md covering quickstart, API key setup, commands reference, and common errors
 - [x] Add config file support for default API key and units (config.yml in ~/.config/weather-cli/)
   - Deliverable: config.py loading from YAML with fallback to environment variables
-- [ ] Package the tool for PyPI distribution and create installation instructions
+- [x] Package the tool for PyPI distribution and create installation instructions
   - Deliverable: Built wheel file, published to test PyPI, and docs/INSTALL.md with pip install instructions
 ```
