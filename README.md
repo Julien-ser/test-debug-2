@@ -17,6 +17,7 @@ A Python command-line tool that fetches and displays weather information using t
 **Phase 1: Planning & Setup** - In Progress
 - ✅ Requirements documented (see `requirements.md`)
 - ✅ API provider selected (WeatherAPI.com) - see `API_COMPARISON.md`
+- ✅ Python project initialization (pyproject.toml, virtual environment)
 - 🔄 Project structure initialization (next step)
 - ⏳ Initial Git commit
 
@@ -51,11 +52,18 @@ pip install weather-cli
 # Clone and enter project directory
 cd projects/test-debug-2
 
-# Install dependencies (using system Python)
-pip install requests click tabulate pyyaml requests-cache pytest
+# Activate virtual environment (recommended)
+# On Linux/macOS:
+source .venv/bin/activate
+# On Windows:
+# .venv\Scripts\activate
+
+# Install dependencies in editable mode
+pip install -e .
 
 # Run the tool (once implemented)
-python -m weather_cli.weather London --units metric
+weather London --units metric
+# Or: python -m weather_cli.weather London --units metric
 ```
 
 ### Configuration

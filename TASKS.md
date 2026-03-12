@@ -6,7 +6,7 @@
   - Deliverable: requirements.md with concrete specifications and success criteria
 - [x] Research and select weather API provider based on free tier limits, data richness, and ease of integration
   - Deliverable: API comparison matrix (OpenWeatherMap vs WeatherAPI vs AccuWeather) with final recommendation
-- [ ] Initialize Python project with virtual environment and dependency management
+- [x] Initialize Python project with virtual environment and dependency management
   - Deliverable: pyproject.toml and .venv/ with core dependencies: requests, click/pytest, tabulate
 - [ ] Set up project structure and Git repository
   - Deliverable: Directory structure with src/weather_cli/, tests/, docs/ and initial commit
