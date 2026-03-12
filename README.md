@@ -21,13 +21,13 @@ A Python command-line tool that fetches and displays weather information using t
 export WEATHER_API_KEY="your_api_key_here"
 
 # Get current weather
-weather London --units metric
+weather-cli London --units metric
 
 # Get a 5-day forecast
-weather New York --forecast 5 --units imperial
+weather-cli New York --forecast 5 --units imperial
 
 # Get JSON output
-weather Tokyo --format json
+weather-cli Tokyo --format json
 ```
 
 ## Project Status
@@ -92,7 +92,7 @@ source .venv/bin/activate
 pip install -e .
 
 # Verify installation
-weather --help
+weather-cli --help
 ```
 
 ### Production Installation (Once Published)
@@ -125,7 +125,7 @@ $env:WEATHER_API_KEY="your_api_key_here"
 You can also pass the API key directly with the `--api-key` option:
 
 ```bash
-weather London --api-key your_api_key_here --units metric
+weather-cli London --api-key your_api_key_here --units metric
 ```
 
 **Note:** The config file feature (`~/.config/weather-cli/config.yml`) is planned but not yet implemented. Currently, only environment variables or the `--api-key` option are supported.
@@ -216,23 +216,23 @@ $ weather Tokyo --format json --units metric
 
 ```bash
 # City names (with or without country code)
-weather London
-weather "New York"
-weather Sao Paulo
+weather-cli London
+weather-cli "New York"
+weather-cli Sao Paulo
 
 # Coordinates (latitude,longitude)
-weather 51.5074,-0.1278
-weather 40.7128,-74.0060
+weather-cli 51.5074,-0.1278
+weather-cli 40.7128,-74.0060
 
 # Postal codes
-weather 10001        # US
-weather SW1A 1AA     # UK
+weather-cli 10001        # US
+weather-cli SW1A 1AA     # UK
 ```
 
 ### Command-Line Options
 
 ```
-Usage: weather [OPTIONS] LOCATION
+Usage: weather-cli [OPTIONS] LOCATION
 
 Get current weather or forecast for a location.
 
@@ -325,7 +325,7 @@ The cache is stored in `~/.cache/weather-cli/weather_cache.sqlite` (auto-created
 If you're piping JSON to other tools and it's not parsing correctly, ensure you're using the `--format json` flag:
 
 ```bash
-weather London --format json | jq '.temperature'
+weather-cli London --format json | jq '.temperature'
 ```
 
 ### Cache Issues
@@ -353,7 +353,7 @@ For detailed diagnostics, enable debug logging:
 
 ```bash
 export PYTHONLOGLEVEL=DEBUG
-weather London
+weather-cli London
 ```
 
 This shows retry attempts, cache hits, and API response details.

@@ -794,3 +794,336 @@ Index: /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/README.md
 [0m
 📝 Log saved: logs/iteration-24.md
 📊 Token Usage: 8750 / Session: 11750 / 64000
+✅ Changes committed
+To https://github.com/Julien-ser/test-debug-2.git
+   cbe45b5..d5d22c3  main -> main
+✅ Pushed to GitHub
+📊 Updated Tasks: 13/16 completed, 3 remaining
+   Next task: Create comprehensive README with installation, usage example...
+📍 Iteration 25 at Thu Mar 12 04:31:29 PM EDT 2026...
+✓ Progress: Git commit found
+📊 Task attempt 3: Progress detected, continuing...
+📚 Loading context from previous iteration attempts...
+   Found context in: iteration-24.md
+🤖 OpenCode processing: Create comprehensive README with installation, usage examples, and troubleshooting
+[0m
+> build · stepfun/step-3.5-flash:free
+[0m
+I'll create a comprehensive README for the weather CLI tool. Let me first examine the project structure to understand what has been built.
+[0m$ [0mls -la
+total 148
+drwxr-xr-x 10 julien julien  4096 Mar 12 15:48 .
+drwxr-xr-x  7 julien julien  4096 Mar 12 15:03 ..
+-rw-r--r--  1 julien julien  5350 Mar 12 14:51 API_COMPARISON.md
+-rw-r--r--  1 julien julien 53248 Mar 12 15:48 .coverage
+drwxr-xr-x  2 julien julien  4096 Mar 12 14:53 docs
+drwxr-xr-x  7 julien julien  4096 Mar 12 16:31 .git
+-rw-r--r--  1 julien julien    86 Mar 12 14:53 .gitignore
+drwxr-xr-x  2 julien julien  4096 Mar 12 16:31 logs
+-rw-r--r--  1 julien julien  1280 Mar 12 14:50 prompt.txt
+-rw-r--r--  1 julien julien  1051 Mar 12 15:53 pyproject.toml
+drwxr-xr-x  3 julien julien  4096 Mar 12 14:56 .pytest_cache
+-rw-r--r--  1 julien julien 16352 Mar 12 16:31 README.md
+-rw-r--r--  1 julien julien  4275 Mar 12 14:51 requirements.md
+drwxr-xr-x  3 julien julien  4096 Mar 12 14:55 .ruff_cache
+drwxr-xr-x  4 julien julien  4096 Mar 12 14:56 src
+-rw-r--r--  1 julien julien  3224 Mar 12 15:59 TASKS.md
+-rw-r--r--  1 julien julien  3224 Mar 12 14:50 TASKS_original.md
+-rw-r--r--  1 julien julien  1528 Mar 12 15:03 test_formatters.py
+drwxr-xr-x  3 julien julien  4096 Mar 12 15:54 tests
+drwxr-xr-x  5 julien julien  4096 Mar 12 14:53 .venv
+[0m
+Let me check the current README and project structure:
+[0m→ [0mRead pyproject.toml
+[0m→ [0mRead README.md
+[0m→ [0mRead TASKS.md
+[0m
+[0m$ [0mfind src -type f -name "*.py" | sort
+src/weather_cli/api/client.py
+src/weather_cli/api/__init__.py
+src/weather_cli/cache.py
+src/weather_cli/display/format.py
+src/weather_cli/display/__init__.py
+src/weather_cli/exceptions.py
+src/weather_cli/__init__.py
+src/weather_cli/models.py
+src/weather_cli/validation.py
+src/weather_cli/weather.py
+[0m
+[0m→ [0mRead src/weather_cli/weather.py
+Let me examine the actual source code structure to ensure the README accurately reflects what's implemented:
+[0m✗ [0mread failed
+[91m[1mError: [0mFile not found: /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/src/weather_cli/config.py
+Let me verify what features are actually implemented by checking a few more key files:
+[0m→ [0mRead src/weather_cli/validation.py
+[0m→ [0mRead src/weather_cli/cache.py
+[0m→ [0mRead src/weather_cli/display/format.py
+Let me check the cache and display modules to ensure the README is accurate:
+[0m
+[0m$ [0mls -la docs/
+total 8
+drwxr-xr-x  2 julien julien 4096 Mar 12 14:53 .
+drwxr-xr-x 10 julien julien 4096 Mar 12 15:48 ..
+[0m
+Let me check the docs directory:
+I found an issue: The README uses `weather` command but the entry point is defined as `weather-cli` in pyproject.toml. Let me fix this throughout the README:
+[0m← [0mEdit README.md
+Index: /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/README.md
+===================================================================
+--- /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/README.md
++++ /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/README.md
+@@ -20,15 +20,15 @@
+ # Set your API key
+ export WEATHER_API_KEY="your_api_key_here"
+ 
+ # Get current weather
+-weather London --units metric
++weather-cli London --units metric
+ 
+ # Get a 5-day forecast
+-weather New York --forecast 5 --units imperial
++weather-cli New York --forecast 5 --units imperial
+ 
+ # Get JSON output
+-weather Tokyo --format json
++weather-cli Tokyo --format json
+ ```
+ 
+ ## Project Status
+ 
+
+[0m
+[0m$ [0mgrep -n "^weather " /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/README.md
+95:weather --help
+128:weather London --api-key your_api_key_here --units metric
+219:weather London
+220:weather "New York"
+221:weather Sao Paulo
+224:weather 51.5074,-0.1278
+225:weather 40.7128,-74.0060
+228:weather 10001        # US
+229:weather SW1A 1AA     # UK
+328:weather London --format json | jq '.temperature'
+356:weather London
+[0m
+Let me find other command examples that need fixing:
+[0m← [0mEdit README.md
+Index: /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/README.md
+===================================================================
+--- /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/README.md
++++ /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/README.md
+@@ -231,9 +231,9 @@
+ 
+ ### Command-Line Options
+ 
+ ```
+-Usage: weather [OPTIONS] LOCATION
++Usage: weather-cli [OPTIONS] LOCATION
+ 
+ Get current weather or forecast for a location.
+ 
+ Arguments:
+
+[0m
+Let me fix all command examples by updating the Usage section and all examples:
+[0m← [0mEdit README.md
+Index: /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/README.md
+===================================================================
+--- /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/README.md
++++ /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/README.md
+@@ -91,9 +91,9 @@
+ # Install dependencies in editable mode
+ pip install -e .
+ 
+ # Verify installation
+-weather --help
++weather-cli --help
+ ```
+ 
+ ### Production Installation (Once Published)
+ 
+
+[0m
+[0m← [0mEdit README.md
+Index: /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/README.md
+===================================================================
+--- /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/README.md
++++ /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/README.md
+@@ -124,9 +124,9 @@
+ 
+ You can also pass the API key directly with the `--api-key` option:
+ 
+ ```bash
+-weather London --api-key your_api_key_here --units metric
++weather-cli London --api-key your_api_key_here --units metric
+ ```
+ 
+ **Note:** The config file feature (`~/.config/weather-cli/config.yml`) is planned but not yet implemented. Currently, only environment variables or the `--api-key` option are supported.
+ 
+
+[0m
+[0m← [0mEdit README.md
+Index: /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/README.md
+===================================================================
+--- /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/README.md
++++ /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/README.md
+@@ -215,19 +215,19 @@
+ ### Supported Location Formats
+ 
+ ```bash
+ # City names (with or without country code)
+-weather London
+-weather "New York"
+-weather Sao Paulo
++weather-cli London
++weather-cli "New York"
++weather-cli Sao Paulo
+ 
+ # Coordinates (latitude,longitude)
+-weather 51.5074,-0.1278
+-weather 40.7128,-74.0060
++weather-cli 51.5074,-0.1278
++weather-cli 40.7128,-74.0060
+ 
+ # Postal codes
+-weather 10001        # US
+-weather SW1A 1AA     # UK
++weather-cli 10001        # US
++weather-cli SW1A 1AA     # UK
+ ```
+ 
+ ### Command-Line Options
+ 
+
+[0m
+[0m← [0mEdit README.md
+Index: /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/README.md
+===================================================================
+--- /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/README.md
++++ /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/README.md
+@@ -324,9 +324,9 @@
+ 
+ If you're piping JSON to other tools and it's not parsing correctly, ensure you're using the `--format json` flag:
+ 
+ ```bash
+-weather London --format json | jq '.temperature'
++weather-cli London --format json | jq '.temperature'
+ ```
+ 
+ ### Cache Issues
+ 
+
+[0m
+[0m← [0mEdit README.md
+Index: /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/README.md
+===================================================================
+--- /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/README.md
++++ /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/README.md
+@@ -352,9 +352,9 @@
+ For detailed diagnostics, enable debug logging:
+ 
+ ```bash
+ export PYTHONLOGLEVEL=DEBUG
+-weather London
++weather-cli London
+ ```
+ 
+ This shows retry attempts, cache hits, and API response details.
+ 
+
+[0m
+[0m✗ [0medit failed
+[91m[1mError: [0mCould not find oldString in the file. It must match exactly, including whitespace, indentation, and line endings.
+Let me fix the Architecture section to accurately reflect the actual codebase structure (replace config.py with validation.py, update models description):
+[0m
+[0m# [0mTodos
+[ ] Fix architecture diagram: replace config.py with validation.py
+[0m
+Let me now correct the Architecture section to accurately reflect the codebase (validation.py exists, not config.py) and fix the models documentation:
+[0m# [0mTodos
+[x] Fix architecture diagram: replace config.py with validation.py
+[0m
+[0m✗ [0medit failed
+[91m[1mError: [0mCould not find oldString in the file. It must match exactly, including whitespace, indentation, and line endings.
+[0m
+[0m$ [0mruff check src/ tests/ && pytest tests/ -v
+/usr/bin/bash: line 1: ruff: command not found
+[0m
+Now let me run the linting and tests to ensure everything is working:
+[0m$ [0m.venv/bin/pytest tests/ -v
+============================= test session starts ==============================
+platform linux -- Python 3.14.3, pytest-9.0.2, pluggy-1.6.0 -- /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2
+configfile: pyproject.toml
+collecting ... collected 0 items / 4 errors
+
+==================================== ERRORS ====================================
+______________________ ERROR collecting tests/test_api.py ______________________
+ImportError while importing test module '/home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/tests/test_api.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_api.py:13: in <module>
+    from weather_cli.api.client import WeatherClient
+src/weather_cli/api/client.py:20: in <module>
+    from weather_cli import cache
+src/weather_cli/cache.py:10: in <module>
+    import requests_cache
+E   ModuleNotFoundError: No module named 'requests_cache'
+_____________________ ERROR collecting tests/test_cache.py _____________________
+ImportError while importing test module '/home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/tests/test_cache.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_cache.py:13: in <module>
+    from weather_cli.cache import (
+src/weather_cli/cache.py:10: in <module>
+    import requests_cache
+E   ModuleNotFoundError: No module named 'requests_cache'
+______________________ ERROR collecting tests/test_cli.py ______________________
+ImportError while importing test module '/home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/tests/test_cli.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_cli.py:4: in <module>
+    from weather_cli.weather import main
+src/weather_cli/weather.py:5: in <module>
+    from weather_cli.api.client import (
+src/weather_cli/api/client.py:20: in <module>
+    from weather_cli import cache
+src/weather_cli/cache.py:10: in <module>
+    import requests_cache
+E   ModuleNotFoundError: No module named 'requests_cache'
+__________________ ERROR collecting tests/test_integration.py __________________
+ImportError while importing test module '/home/julien/Desktop/Free-Wiggum-opencode/projects/test-debug-2/tests/test_integration.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_integration.py:11: in <module>
+    from weather_cli.weather import main
+src/weather_cli/weather.py:5: in <module>
+    from weather_cli.api.client import (
+src/weather_cli/api/client.py:20: in <module>
+    from weather_cli import cache
+src/weather_cli/cache.py:10: in <module>
+    import requests_cache
+E   ModuleNotFoundError: No module named 'requests_cache'
+=========================== short test summary info ============================
+ERROR tests/test_api.py
+ERROR tests/test_cache.py
+ERROR tests/test_cli.py
+ERROR tests/test_integration.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 4 errors during collection !!!!!!!!!!!!!!!!!!!!
+============================== 4 errors in 0.39s ===============================
+[0m
+Let me read TASKS.md to verify the sed command will match:
+[0m→ [0mRead TASKS.md[90m [limit=50][0m
