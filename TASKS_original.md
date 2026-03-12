@@ -2,7 +2,7 @@
 **Mission:** Build a Python CLI tool that fetches and displays weather information
 
 ## Phase 1: Planning & Setup
-- [x] Define project scope and document non-functional requirements (response time < 5s, support for metric/imperial units, error handling strategy)
+- [ ] Define project scope and document non-functional requirements (response time < 5s, support for metric/imperial units, error handling strategy)
   - Deliverable: requirements.md with concrete specifications and success criteria
 - [ ] Research and select weather API provider based on free tier limits, data richness, and ease of integration
   - Deliverable: API comparison matrix (OpenWeatherMap vs WeatherAPI vs AccuWeather) with final recommendation
